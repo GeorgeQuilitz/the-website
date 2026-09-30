@@ -1,9 +1,8 @@
 'use client'
 
 import styles from './page.module.css'
-import { ListElement } from '@/app/admin/layout/List'
-import { SearchModal } from '@/app/admin/layout/SearchModal'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
+import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
 import {
     Form,
     FormGroup,
@@ -25,7 +24,12 @@ import {
     useUnpaginatedSearch,
 } from '@/util/hooks'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Position, UserProfile, zUserProfile } from 'pv-contracts/data'
+import {
+    Position,
+    PositionTypes,
+    UserProfile,
+    zUserProfile,
+} from 'pv-contracts/data'
 import { SearchRequest, SortDirection } from 'pv-contracts/requests'
 import {
     PaginatedResponse,
@@ -50,6 +54,8 @@ const blankPosition: Position = {
     name: '',
     childIds: [],
     userIds: [],
+    type: PositionTypes.POSITION,
+    seats: 1,
 }
 
 export default function Page() {
@@ -143,6 +149,8 @@ export default function Page() {
             positionQueries.createPosition({
                 name: newValue.name,
                 parentIds: [],
+                positionType: newValue.type,
+                seats: newValue.seats,
             }),
         onChange: (value) => {
             setSelectedPosition(value)
@@ -156,6 +164,8 @@ export default function Page() {
                 name: newValue.name,
                 childIds: newValue.childIds,
                 userIds: newValue.userIds,
+                positionType: newValue.type,
+                seats: newValue.seats,
             }),
         onChange: (value) => {
             setSelectedPosition(value)
@@ -426,13 +436,14 @@ function SubordinatesField(props: SubordinatesFieldProps) {
                 }
             >
                 {filteredPositions.map((p) => (
-                    <ListElement
+                    <button
                         key={p.id}
+                        type="button"
                         className={styles.pickerItem}
                         onClick={() => handleAdd(p.id)}
                     >
                         {p.name}
-                    </ListElement>
+                    </button>
                 ))}
                 {filteredPositions.length === 0 && (
                     <div className={styles.pickerEmpty}>
@@ -558,8 +569,9 @@ function OccupantsField(props: OccupantsFieldProps) {
                     const hasName = !!(u.firstName && u.lastName)
                     const discord = u.discordUsers?.[0]?.username
                     return (
-                        <ListElement
+                        <button
                             key={u.id}
+                            type="button"
                             className={styles.pickerItem}
                             onClick={() => handleAdd(u.id)}
                         >
@@ -573,7 +585,7 @@ function OccupantsField(props: OccupantsFieldProps) {
                                     ? `@${discord}`
                                     : (u.email ?? `User #${u.id}`)}
                             </span>
-                        </ListElement>
+                        </button>
                     )
                 })}
                 {searchResults.length === 0 &&
